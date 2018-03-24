@@ -1,0 +1,13 @@
+{
+  "name": "challenge",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "debug": "^2.6.8",
+    "express": "^4.15.3",
+    "zcom-contracts": "git+https://github.com/zcom-cloud-blockchain/solidity.git"
+  }
+}
