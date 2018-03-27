@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test Performance</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="./public/js/local-storage.js"></script>
+        <script type="text/javascript" src="./public/js/demo-util.js"></script>
+
+    </head>
+    <body class="container">
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="/node_modules/eth-client/dist/eth-client.min.js"></script>
+        <script src="/node_modules/bluebird/js/browser/bluebird.min.js"></script>
+        <script src="/node_modules/mathjs/dist/math.min.js"></script>
+        <script src="/node_modules/node-xlsx/src/helpers.js"></script>
+        <script src="/node_modules/node-xlsx/src/index.js"></script>
+        <script src="/node_modules/node-xlsx/src/workbook.js"></script>
+        
+        <div class="actions">
+            <input type="file" id="file" />
+            <input type="button" id="create_Object_file" value="create_Object_file" class="btn primary"/>
+            <input type="button" id="run_test" value="Run Test" class="btn primary"/> 
+            <input type="button" id="clear" value="Clear" class="btn"/>    
+        </div>
+        <div id="log"></div>
+
+        <script type="text/javascript">
+            var log = document.getElementById('log'),
+            input = document.getElementById('file'),
+            password = '123456';
+            var account;
+            var file;
+            var count_request = 0;
+            var begin_time ; 
+            var executionTimes = [];
+            var dataExcel = [];
+
+
+            const cnsAddress = '0xb88af4197835a94ae98af88836fbedd48c6ab270';
+            const baseUrl = 'https://stg.zcom.thing-chain.site/';
+            const abi = [{"constant":true,"inputs":[{"name":"_id","type":"uint256"}],"name":"getData","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"provider","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"call","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_sign","type":"bytes"},{"name":"_objectId","type":"bytes32"},{"name":"_dataHash","type":"bytes32"},{"name":"_name","type":"bytes32"}],"name":"sendData","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"isVersionContract","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"isVersionLogic","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"contractName","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"logic_v1","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_sign","type":"bytes"},{"name":"_symbol","type":"bytes32"},{"name":"_name","type":"bytes32"}],"name":"sendTransaction","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"isVersionContractOrLogic","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"cns","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getContractName","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCns","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_cns","type":"address"},{"name":"_logic_v1","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}];
+
+            function registerLog(str, className) {
+                var elem = document.createElement('div');
+
+                elem.innerHTML = str;
+                elem.className = 'alert-message' + (className ? ' '  + className : '');
+                log.appendChild(elem);
+            }
+
+            function average(values) {
+                for (var i = 0, sum = 0, l = values.length; i < l; ++i) {
+                    sum += values[i];
+                }
+                return sum / l;
+            };
+            
+            function doloadFile() {
+                
+                if (!input.files.length) {
+                    registerLog('<strong>Please select a file.</strong><br/>');
+                    return;
+                }
+    
+                file = input.files[0];
+                console.log('file',file);
+                localStorage.setItem("key-file", file);
+            };
+
+            function docreate(){
+                var create = Promise.promisify(ethClient.Account.create);
+                return create(baseUrl, password).then(function(response){
+                    account = response;
+                    console.log("account :",account);
+                });
+            }
+
+            function dosendFile() {
+                console.log("File :",file);
+                registerLog('Object_ID : ' + DEMO_UTIL.createRandomId(32) ,'info');
+
+                const  contract = new ethClient.AltExecCnsContract(account, cnsAddress);
+                return new Promise(function(resolve, reject) {
+                    contract.sendFile(password, 'TestPerformanceContract', 'sendFile', DEMO_UTIL.createRandomId(32) ,'giang.txt',file,['file1'], abi, function(err, txHash) {
+                        if (err) {
+                            reject(err);
+                            registerLog('Error : '+ err,'error');
+                        } else {
+                            resolve(txHash);
+                            registerLog('sendFile result : '+txHash,'info');     
+                        }
+                    });   
+                }); 
+            }
+            function condition(t,during) {
+                const setTime = t + during;
+                 console.log('setTime',setTime);
+                 console.log('now',Date.now());
+                 console.log('condition',setTime < Date.now());
+                return setTime > Date.now();
+            }
+
+            
+
+            loop = Promise.coroutine(function* (during) {
+                var interval = 1000;
+                console.log('during',during);
+                console.log('begin_time',begin_time);
+                
+   
+   
+                //直列で実行
+                while(condition( begin_time, during)) {
+                    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+                    const start_time = Date.now();
+        
+                    yield dosendFile();
+         
+                    count_request = count_request + 1;
+                    const executionTime = Date.now() - start_time;
+        
+                    executionTimes.push(executionTime);
+        
+                    const sleep = Math.max(0, interval - executionTime);
+
+                    console.log(`${count_request}: ${executionTime}: ${sleep}`);
+                    let  arrTemp = [`${count_request}`,`${executionTime}`,`${sleep}`];
+                    dataExcel.push(arrTemp);
+
+                    yield Promise.delay(sleep);
+                }
+            });
+
+            run_test = function(during , rps){
+                begin_time = Date.now();
+
+                 
+                let result = [];
+    
+                var start_test_time = new Date().toUTCString();
+                registerLog(`試験の開始時間 : ${start_test_time} `,'info');
+    
+                let arrHeaderTitle = ['total_request','latency','sleep'];
+                dataExcel.push(arrHeaderTitle);
+
+                docreate().then(function(response){
+                    //並列で実行
+                    var loops = [];
+                    for (var i = 1; i <= rps; ++i) {
+                        loops.push(loop(during));
+                    }
+
+                    return Promise.all(loops);
+                }).then(function(req, res) {
+                    console.log(executionTimes);
+                    var latency_avg = average(executionTimes);
+                    var latency_max = Math.max.apply(Math, executionTimes);
+
+                    registerLog('-----------------end loop----------------','info');
+                    registerLog('during :'+ during,'info');
+                    registerLog('rps :'+ rps,'info');
+                    registerLog('-------------------結果------------------','info');
+                    registerLog('total_request:'+count_request,'info');
+                
+                    var times = Date.now()-begin_time;
+                    registerLog('かかった時間 : '+ times ,'info');
+
+                    registerLog(`latency(avg) : ${latency_avg} ms`,'info');
+                    registerLog(`latency(max) : ${latency_max} ms`,'info');
+                    registerLog('total_latency  : '+ math.sum(executionTimes),'info');
+
+                    var end_test_time = new Date().toUTCString();
+                    registerLog(`試験の終了時間 : ${end_test_time} `,'info');
+
+                    /*result.push(['シート名','during','rps','total_request','かかった時間','latency(avg)','latency(max)', '開始時間UTC','終了時間']);
+                    result.push([rps, during, rps,count_request, times, latency_avg, latency_max,  start_test_time, end_test_time]);
+
+                    let buffer = xlsx.build([
+                        {name: `log_executionTime_${rps}`, data: dataExcel} , 
+                        {name: `試験の結果_${rps}`, data: result}
+                    ]);
+        
+                    fs.open(`/output_result/test_sendTransaction_${rps}.xlsx`, 'w', function(err, fd) {
+                        if (err) {
+                            return console.error(err);
+                        }
+                        console.log("File open!"); 
+
+                        fs.writeFile(`/output_result/test_sendTransaction_${rps}.xlsx`, buffer,  function(err) {
+                            if (err) return console.error(err);
+                        });
+     
+                        fs.close(fd, function(err){
+                            if (err)registerLog(err,'error');
+                            registerLog("File closed",'info');
+                        });
+                    });*/
+                })        
+            }
+            function dorunTest() {
+               run_test(1000,2);
+            };
+
+
+            function clearLog() {
+                if (!running) {
+                    log.innerHTML = '';
+                }
+            }
+           
+           document.getElementById('create_Object_file').addEventListener('click', doloadFile);
+           document.getElementById('run_test').addEventListener('click', dorunTest);
+           document.getElementById('clear').addEventListener('click', clearLog);
+        </script>
+        
+    </body>
+</html>
+
+

@@ -6,7 +6,7 @@
     <script src="//api.blockchain.z.com/static/client/lib/eth-client.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script type="text/javascript">
-    const CNS_ADDRESS = '0x803209e90f8dc0e17c5beccfca2ecd49b77fca8f';
+    const CNS_ADDRESS = '0x9f68cac661df98830fea04dd5941c45ce9f5d495';
     const Giang_COIN_ABI = [{"constant":true,"inputs":[],"name":"provider","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"isVersionContract","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"exist","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"isVersionLogic","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"contractName","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_logic","type":"address"}],"name":"setMyCoinLogic_v1","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"logic_v1","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"isVersionContractOrLogic","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_sign","type":"bytes"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"send","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"cns","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_account","type":"address"}],"name":"getAmount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getContractName","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCns","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_cns","type":"address"},{"name":"_logic","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}];
     
     const serializedAccount = localStorage.getItem('account');
@@ -34,24 +34,10 @@
             }
         });
     }
-
-     function exist() {
-        contract.call('password', 'GiangCoin', 'exist', [account.getAddress()], Giang_COIN_ABI, function(err, exist) {
-            if (err) {
-                alert('err');
-                console.error(err);
-            } else {
-                console.log(exist);
-                $('#exist').text(exist);
-            }
-        });
-    }
- 
- 
+    
     $(document).ready(function() {
         $('#giang-address').text(account.getAddress());
         getAmount();
-        exist();
     });
     </script>
 </head>
@@ -65,10 +51,6 @@
     <div>
         <div>所持金</div>
         <div id="amount"></div>
-    </div>
-    <div>
-        <div>address ẽit</div>
-        <div id="exist"></div>
     </div>
     <h3>送金</h3>
     <div>

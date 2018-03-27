@@ -12,8 +12,8 @@ contract GiangCoinLogic_v1 is VersionLogic {
     GiangCoinEvent_v1 public event_v1;
 
     modifier onlyFirst() {
-        //if (!initDone) throw;
-        require(!initDone);
+        if (!initDone) throw;
+        //require(!initDone);
         _;
     }
 
@@ -28,7 +28,7 @@ contract GiangCoinLogic_v1 is VersionLogic {
         giangCoinTable_v1 = _giangCoinTable;
         event_v1 = _event;
     }
-    //Trong ứng dụng lần này , chức năng phát hành tiền tệ không được thực hiên , nên đầu tiên ta cần phải phát hành  toàn bộ tiền tệ .  Sử dụng init  ta phát hành tiền tệ cho tài khoản đang có  với  chỉ tham số  TOTAL_AMOUNT  .
+    
     function init(address _initAccount) public onlyByProvider onlyFirst {
         giangCoinTable_v1.create(_initAccount);
         giangCoinTable_v1.setAmount(_initAccount, TOTAL_AMOUNT);
@@ -41,6 +41,14 @@ contract GiangCoinLogic_v1 is VersionLogic {
 
     function setGiangCoinEvent_v1(GiangCoinEvent_v1 _event) public onlyByProvider {
         event_v1 = _event;
+    }
+    
+    function call() constant returns (bytes32) {
+        return "hellogiangpt kaka";
+    }
+    
+    function sendTransaction(address _caller, bytes32 _symbol, bytes32 _name) onlyByVersionContractOrLogic {
+       //todo something
     }
 
     function exist(address _account) public constant returns (bool) {

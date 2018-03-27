@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test Performance</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    </head>
+    <body class="container">
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="/node_modules/eth-client/dist/eth-client.min.js"></script>
+
+         
+         <div class="actions">
+          <input type="file" id="file" />
+          <input type="button" id="create" value="create" class="btn primary"/>
+          <input type="button" id="run_test" value="Run Test" class="btn primary"/>  
+      </div>  
+       
+         <script type="text/javascript">
+        //var input = document.getElementById('file');
+               
+        function doloadFile() {
+            var input = document.getElementById('file');
+            
+            var file = input.files[0];
+           
+
+            xhr = new XMLHttpRequest();
+            xhr.open("post", "/runtest", true);
+            xhr.setRequestHeader("Content-Type", "multipart/form-data");
+            xhr.setRequestHeader("X-File-Name", file.name);
+            xhr.setRequestHeader("X-File-Size", file.size);
+            xhr.setRequestHeader("X-File-Type", file.type);
+            xhr.send(file);
+        }
+             
+             
+                document.getElementById('create').addEventListener('click', doloadFile);
+                document.getElementById('run_test').addEventListener('click', dorunTest);
+                
+             </script> 
+        
+    </body>
+</html>
+
+

@@ -24,8 +24,8 @@ contract GiangCoinAccountTable_v1 is VersionField {
 
     function create(address _account) public onlyByNextVersionOrVersionLogic {
         bytes32 id = bytes32(_account);
-        //if (exist(id)) throw;
-        require(exist(id));
+        if (exist(id)) throw;
+        //require(exist(id));
         accounts[id] = Account({ isCreated: true, amount: 0 });
     }
 
@@ -37,7 +37,7 @@ contract GiangCoinAccountTable_v1 is VersionField {
 
     function getAmount(address _account) public constant returns (uint) {
         bytes32 id = bytes32(_account);
-        if (shouldReturnDefault(id)) return 0;
+        if (shouldReturnDefault(id)) return 111;
         return accounts[id].amount;
     }
 }
